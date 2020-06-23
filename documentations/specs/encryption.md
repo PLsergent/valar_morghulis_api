@@ -80,7 +80,7 @@ Lorsque qu'un utilisateur cré un nouvel article, on va **chiffrer les données 
 
 - **Transmission d'un article** :
 
-Si un utilisateur veut soumettre son article aux médias/experts, on va alors **récupérer la/les clefs publiques des utilisateurs concernés**. Puis on va **créer des copies de cette article qui seront chiffrées avec chaque clef publique récupérée**. Ainsi les médias/experts pourront lire les données de cette article.
+Si un utilisateur veut soumettre son article aux médias/experts, on va alors **récupérer la/les clefs publiques des experts concernés**. On va ensuite **créer des copies de cette article qui seront chiffrées avec chaque clef publique récupérée**. Ainsi les médias/experts pourront déchiffrer l'article à l'aide de leur clef privée et ainsi lire les données de ce dernier.
 
 ---
 
