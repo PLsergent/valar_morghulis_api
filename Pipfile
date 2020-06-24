@@ -15,6 +15,7 @@ uvicorn = "*"
 python-dotenv = "*"
 pyjwt = "*"
 passlib = "*"
+bcrypt = "*"
 
 [requires]
 python_version = "3.7"

@@ -3,7 +3,9 @@ from typing import Any, List
 from sqlalchemy.orm import Session
 
 import security
-import crud, models, schemas
+import models, schemas
+
+from crud.crud_user import user as crud_user
 
 
 router = APIRouter()
@@ -13,17 +15,16 @@ router = APIRouter()
 def create_user(
     *,
     db: Session = Depends(security.get_db),
-    user_in: schemas.user.UserCreate,
-    current_user: models.User = Depends(security.get_current_user),
+    user_in: schemas.user.UserCreate
 ) -> Any:
     """
     Create new user.
     """
-    user = crud.user.get_by_email(db, email=user_in.email)
+    user = crud_user.get_by_username(db, username=user_in.username)
     if user:
         raise HTTPException(
             status_code=400,
             detail="The user with this username already exists in the system.",
         )
-    user = crud.user.create(db, obj_in=user_in)
+    user = crud_user.create(db, obj_in=user_in)
     return user
