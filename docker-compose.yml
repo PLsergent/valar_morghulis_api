@@ -2,12 +2,21 @@ version: "3"
 
 services:
   db:
-    image: postgres:11
+    image: postgres:13
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=db_api
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     volumes:
+      - valar_morghulis_db:/var/lib/postgresql/data
       - ./scripts/initdb:/docker-entrypoint-initdb.d
+
+  backend:
+    image: valar_morghulis_api:latest
+    build: .
+    ports:
+      - 8080:80
+
+volumes:
+  valar_morghulis_db:
