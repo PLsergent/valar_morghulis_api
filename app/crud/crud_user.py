@@ -9,8 +9,11 @@ from app.schemas.user import UserCreate, UserUpdate
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
-    def get_by_username(self, db: Session, *, username: str) -> Optional[UserCreate]:
-        return db.query(User).filter(User.username == username).first()
+    def get_by_username(self, db: Session, *, username: str) -> Optional[User]:
+        return db.query(User).filter_by(username=username).one_or_none()
+    
+    def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
+        return db.query(User).filter_by(email=email).one_or_none()
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
         db_obj = User(

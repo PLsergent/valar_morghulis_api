@@ -37,7 +37,7 @@ def test_create_user_existing_email(
     r = client.post("/users/register",  json=data)
 
     assert r.status_code == 400
-    assert r.json() == {"Email already taken."}
+    assert r.json() == {"detail": "Email already taken."}
 
 
 def test_create_user_existing_username(
@@ -55,4 +55,4 @@ def test_create_user_existing_username(
     r = client.post("/users/register",  json=data)
 
     assert r.status_code == 400
-    assert r.json() == {"Username already taken."}
+    assert r.json() == {"detail": "Username already taken."}
