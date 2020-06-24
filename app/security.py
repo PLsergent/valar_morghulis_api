@@ -7,9 +7,9 @@ from jwt import PyJWTError
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
-from schemas.user import User, UserInDB
-from schemas.token import TokenData
-from db.session import SessionLocal
+from app.schemas.user import User, UserInDB
+from app.schemas.token import TokenData
+from app.db.session import SessionLocal
 
 
 SECRET_KEY = "4e3266deab26678a65c960edfdd890d02e5584ad2d46bb8d874f78afe2a692de"

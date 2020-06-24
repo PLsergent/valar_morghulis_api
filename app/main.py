@@ -4,10 +4,10 @@ import os
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 
-from api.routes import api_router
+from app.api.routes import api_router
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-load_dotenv(os.path.join(BASE_DIR, "../.env"))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 
 app = FastAPI()
 
