@@ -20,7 +20,7 @@ def login_access_token(
         db, username=form_data.username, password=form_data.password
     )
     if not user:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+        raise HTTPException(status_code=400, detail="Incorrect username or password.")
     access_token_expires = timedelta(minutes=30)
     return {
         "access_token": security.create_access_token(

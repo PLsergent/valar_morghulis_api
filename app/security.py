@@ -65,10 +65,10 @@ def get_current_user(
             token, SECRET_KEY, algorithms=[ALGORITHM]
         )
         token_data = TokenPayload(**payload)
-    except (jwt.JWTError, ValidationError):
+    except (PyJWTError, ValidationError):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Could not validate credentials",
+            detail="Could not validate credentials.",
         )
     user = crud.user.get(db, id=token_data.sub)
     if not user:
