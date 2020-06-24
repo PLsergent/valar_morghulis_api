@@ -9,15 +9,6 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=db_api
-  web:
-    build: .
-    command: bash -c "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 8000 --reload"
-    volumes:
-      - ./code/:/code
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
 
   pgadmin:
     container_name: pgadmin
