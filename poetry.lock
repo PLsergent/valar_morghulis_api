@@ -1,5 +1,5 @@
 [[package]]
-category = "dev"
+category = "main"
 description = "A database migration tool for SQLAlchemy."
 name = "alembic"
 optional = false
@@ -286,7 +286,7 @@ requirements = ["pipreqs", "pip-api"]
 xdg_home = ["appdirs (>=1.4.0)"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "A super-fast templating language that borrows the  best ideas from the existing templating languages."
 name = "mako"
 optional = false
@@ -301,7 +301,7 @@ babel = ["babel"]
 lingua = ["lingua"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Safely add untrusted strings to HTML/XML markup."
 name = "markupsafe"
 optional = false
@@ -556,7 +556,7 @@ pytest = ">=4.6"
 testing = ["fields", "hunter", "process-tests (2.0.2)", "six", "pytest-xdist", "virtualenv"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Extensions to the standard Python datetime module"
 name = "python-dateutil"
 optional = false
@@ -578,7 +578,7 @@ version = "0.13.0"
 cli = ["click (>=5.0)"]
 
 [[package]]
-category = "dev"
+category = "main"
 description = "Programmatically open an editor, capture the result."
 name = "python-editor"
 optional = false
@@ -775,7 +775,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "2532ba36498a2a5e3c4b1b09689bb1b9897c83011b2a6ab225654dd1ed94fd36"
+content-hash = "c04fb793953994b0535fa06570c105c7b5d4feb021e6e2fe3b17e4bf184cc51f"
 python-versions = "^3.7"
 
 [metadata.files]
