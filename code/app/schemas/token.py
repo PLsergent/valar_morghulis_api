@@ -10,7 +10,3 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: str = None
-
-
-class TokenPayload(BaseModel):
-    sub: Optional[int] = None

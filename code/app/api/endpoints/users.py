@@ -5,13 +5,13 @@ from sqlalchemy.orm import Session
 import security
 import models, schemas
 
-from crud.crud_user import user as crud_user
+import crud
 
 
 router = APIRouter()
 
 
-@router.post("/register/", response_model=schemas.user.User)
+@router.post("/register", response_model=schemas.user.User)
 def create_user(
     *,
     db: Session = Depends(security.get_db),
@@ -20,11 +20,11 @@ def create_user(
     """
     Create new user.
     """
-    user = crud_user.get_by_username(db, username=user_in.username)
+    user = crud.user.get_by_username(db, username=user_in.username)
     if user:
         raise HTTPException(
             status_code=400,
             detail="The user with this username already exists in the system.",
         )
-    user = crud_user.create(db, obj_in=user_in)
+    user = crud.user.create(db, obj_in=user_in)
     return user

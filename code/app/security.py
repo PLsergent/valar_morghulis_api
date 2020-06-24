@@ -6,19 +6,18 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt import PyJWTError
 from passlib.context import CryptContext
 from pydantic import BaseModel
-from fastapi_sqlalchemy import db
 
 from schemas.user import User, UserInDB
 from schemas.token import TokenData
 from db.session import SessionLocal
 
 
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+SECRET_KEY = "4e3266deab26678a65c960edfdd890d02e5584ad2d46bb8d874f78afe2a692de"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ALGORITHM = "HS256"
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login/token")
 
 
 def get_db() -> Generator:
@@ -41,15 +40,6 @@ def get_user(db, username: str):
     if username in db:
         user_dict = db[username]
         return UserInDB(**user_dict)
-
-
-def authenticate_user(fake_db, username: str, password: str):
-    user = get_user(fake_db, username)
-    if not user:
-        return False
-    if not verify_password(password, user.hashed_password):
-        return False
-    return user
 
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
@@ -77,7 +67,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         token_data = TokenData(username=username)
     except PyJWTError:
         raise credentials_exception
-    user = get_user(db, username=token_data.username)
+    user = get_user(get_db, username=token_data.username)
     if user is None:
         raise credentials_exception
     return user
