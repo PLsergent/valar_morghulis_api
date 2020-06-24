@@ -14,7 +14,7 @@ psycopg2 = "*"
 uvicorn = "*"
 python-dotenv = "*"
 pyjwt = "*"
-passlib = "*"
+passlib = {extras = ["bcrypt"],version = "*"}
 bcrypt = "*"
 
 [requires]

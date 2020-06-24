@@ -1,8 +1,8 @@
 import uvicorn
 from fastapi import FastAPI
 import os
-from fastapi_sqlalchemy import DBSessionMiddleware, db
 from dotenv import load_dotenv
+from starlette.middleware.cors import CORSMiddleware
 
 from api.routes import api_router
 
@@ -12,6 +12,14 @@ load_dotenv(os.path.join(BASE_DIR, "../.env"))
 app = FastAPI()
 
 app.include_router(api_router)
+app.add_middleware(
+        CORSMiddleware,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
