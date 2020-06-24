@@ -16,8 +16,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         db_obj = User(
             email=obj_in.email,
             hashed_password=get_password_hash(obj_in.password),
-            full_name=obj_in.full_name,
-            username=obj_in.username
+            username=obj_in.username,
         )
         db.add(db_obj)
         db.commit()
@@ -44,5 +43,6 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         if not verify_password(password, user.hashed_password):
             return None
         return user
+
 
 user = CRUDUser(User)
