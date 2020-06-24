@@ -7,7 +7,7 @@ from app.db.base_class import Base
 
 class User(Base):
     id = Column(
-        UUID, primary_key=True, index=True, server_default=text('uuid_generate_v4()')
+        UUID(as_uuid=True), primary_key=True, index=True, server_default=text('gen_random_uuid()')
     )
     email = Column(String, unique=True, index=True, nullable=True)
     username = Column(String, unique=True, index=True, nullable=False)
