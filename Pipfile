@@ -8,11 +8,13 @@ verify_ssl = true
 [packages]
 fastapi = "*"
 fastapi-sqlalchemy = "*"
-pydantic = "*"
+pydantic = {extras = ["email"],version = "*"}
 alembic = "*"
 psycopg2 = "*"
 uvicorn = "*"
 python-dotenv = "*"
+pyjwt = "*"
+passlib = "*"
 
 [requires]
 python_version = "3.7"
