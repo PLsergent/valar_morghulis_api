@@ -2,11 +2,10 @@ from sqlalchemy import Column, Integer, String, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
 
-Base = declarative_base()
+from app.db.base_class import Base
 
 
 class User(Base):
-    __tablename__ = "users"
     id = Column(
         UUID, primary_key=True, index=True, server_default=text('uuid_generate_v4()')
     )
