@@ -1,17 +1,33 @@
+import os
 from typing import Generator
 
 import pytest
+from sqlalchemy.orm import Session
 from fastapi.testclient import TestClient
 
-from app.db.session import SessionLocal
+from app.db import session
 from app.main import app
-
-@pytest.fixture(scope="session")
-def db() -> Generator:
-    yield SessionLocal()
+from app.security import get_db
 
 
 @pytest.fixture(scope="module")
 def client() -> Generator:
     with TestClient(app) as c:
         yield c
+
+
+@pytest.fixture()
+def db() -> Generator:
+    connection = session.engine.connect()
+    transaction = connection.begin()
+    test_session = Session(bind=connection, autocommit=False, autoflush=False)
+
+    app.dependency_overrides[get_db] = lambda: test_session
+
+    yield test_session
+
+    app.dependency_overrides.pop(get_db)
+
+    test_session.close()
+    transaction.rollback()
+    connection.close()
