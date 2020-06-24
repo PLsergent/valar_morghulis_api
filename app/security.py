@@ -5,12 +5,13 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jwt import PyJWTError
 from passlib.context import CryptContext
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
+from sqlalchemy.orm import Session
 
 from app.schemas.user import User, UserInDB
-from app.schemas.token import TokenData
+from app.schemas.token import TokenData, TokenPayload
 from app.db.session import SessionLocal
-
+from app import crud, models
 
 SECRET_KEY = "4e3266deab26678a65c960edfdd890d02e5584ad2d46bb8d874f78afe2a692de"
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -42,34 +43,36 @@ def get_user(db, username: str):
         return UserInDB(**user_dict)
 
 
-def create_access_token(data: dict, expires_delta: timedelta = None):
-    to_encode = data.copy()
+def create_access_token(
+    subject: Union[str, Any], expires_delta: timedelta = None
+) -> str:
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
-    to_encode.update({"exp": expire})
+        expire = datetime.utcnow() + timedelta(
+            minutes=30
+        )
+    to_encode = {"exp": expire, "sub": str(subject)}
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+def get_current_user(
+    db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
+) -> models.User:
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except PyJWTError:
-        raise credentials_exception
-    user = get_user(get_db, username=token_data.username)
-    if user is None:
-        raise credentials_exception
+        payload = jwt.decode(
+            token, SECRET_KEY, algorithms=[ALGORITHM]
+        )
+        token_data = TokenPayload(**payload)
+    except (jwt.JWTError, ValidationError):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Could not validate credentials",
+        )
+    user = crud.user.get(db, id=token_data.sub)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
     return user
 
 
