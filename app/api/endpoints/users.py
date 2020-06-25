@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
 from typing import Any
+
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app import crud, schemas
@@ -10,9 +11,7 @@ router = APIRouter()
 
 @router.post("/register", response_model=schemas.user.User)
 def create_user(
-    *,
-    db: Session = Depends(deps.get_db),
-    user_in: schemas.user.UserCreate
+    *, db: Session = Depends(deps.get_db), user_in: schemas.user.UserCreate
 ) -> Any:
     """
     Create new user.
@@ -22,14 +21,10 @@ def create_user(
 
     if user_based_on_username:
         raise HTTPException(
-            status_code=400,
-            detail="Username already taken.",
+            status_code=400, detail="Username already taken.",
         )
-    
+
     if user_based_on_email:
-        raise HTTPException(
-            status_code=400,
-            detail="Email already taken."
-        )
+        raise HTTPException(status_code=400, detail="Email already taken.")
     user = crud.user.create(db, obj_in=user_in)
     return user

@@ -6,9 +6,7 @@ services:
     ports:
       - 5432:5432
     environment:
-      POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
     volumes:
       - valar_morghulis_db:/var/lib/postgresql/data
 
@@ -18,7 +16,6 @@ services:
     environment:
       POSTGRES_HOST: "db"
       BACKEND_CORS_ORIGINS: '["http://localhost", "http://localhost:8080", "http://localhost:3000"]'
-
     ports:
       - 8080:80
     links:

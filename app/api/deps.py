@@ -21,12 +21,6 @@ def get_db() -> Generator:
         db.close()
 
 
-def get_user(db, username: str):
-    if username in db:
-        user_dict = db[username]
-        return UserInDB(**user_dict)
-
-
 def get_current_user(
     db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)
 ) -> models.User:
@@ -40,13 +34,15 @@ def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Could not validate credentials.",
         )
-    user = crud.user.get(db, id=token_data.sub)
+    user = None
+    if token_data.sub:
+        user = crud.user.get(db, id=token_data.sub)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
 
-async def get_current_active_user(current_user: models.User = Depends(get_current_user)):
-    if current_user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
+async def get_current_active_user(
+    current_user: models.User = Depends(get_current_user),
+) -> models.User:
     return current_user

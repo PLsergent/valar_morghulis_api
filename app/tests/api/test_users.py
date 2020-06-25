@@ -11,7 +11,7 @@ def test_create_user_new_email(client: TestClient, db: Session) -> None:
     password = "AniCepasSword14"
     username = "nice_username_du_74"
     data = {"email": email, "password": password, "username": username}
-    r = client.post("/users/register",  json=data)
+    r = client.post("/users/register", json=data)
 
     assert r.status_code == 200
     created_user = r.json()
@@ -22,9 +22,7 @@ def test_create_user_new_email(client: TestClient, db: Session) -> None:
     assert user.hashed_password[:6] == get_password_hash(password)[:6]
 
 
-def test_create_user_existing_email(
-    client: TestClient, db: Session
-) -> None:
+def test_create_user_existing_email(client: TestClient, db: Session) -> None:
     email = "test@email.com"
     password = "AniCepasSword14"
     username = "nice_username_du_74"
@@ -34,15 +32,13 @@ def test_create_user_existing_email(
     crud.user.create(db, obj_in=user_in)
 
     data = {"email": email, "password": password, "username": username}
-    r = client.post("/users/register",  json=data)
+    r = client.post("/users/register", json=data)
 
     assert r.status_code == 400
     assert r.json() == {"detail": "Email already taken."}
 
 
-def test_create_user_existing_username(
-    client: TestClient, db: Session
-) -> None:
+def test_create_user_existing_username(client: TestClient, db: Session) -> None:
     email = "test@email.com"
     password = "AniCepasSword14"
     username = "nice_username_du_74"
@@ -52,7 +48,7 @@ def test_create_user_existing_username(
     crud.user.create(db, obj_in=user_in)
 
     data = {"email": email, "password": password, "username": username}
-    r = client.post("/users/register",  json=data)
+    r = client.post("/users/register", json=data)
 
     assert r.status_code == 400
     assert r.json() == {"detail": "Username already taken."}

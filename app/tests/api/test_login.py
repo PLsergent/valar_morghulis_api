@@ -1,18 +1,15 @@
 from typing import Any
-from sqlalchemy.orm import Session
 
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
 from app import crud
 from app.schemas.user import UserCreate
 
 
 def get_token(client: TestClient, username: str, password: str) -> Any:
-    login_data = {
-        "username": username,
-        "password": password
-    }
-    return client.post("/login/token",  data=login_data)
+    login_data = {"username": username, "password": password}
+    return client.post("/login/token", data=login_data)
 
 
 def test_get_access_token(client: TestClient, db: Session) -> None:
@@ -50,9 +47,7 @@ def test_wrong_username_access_token(client: TestClient, db: Session) -> None:
     assert r.json() == {"detail": "Incorrect username or password."}
 
 
-def test_use_access_token(
-    client: TestClient, db: Session
-) -> None:
+def test_use_access_token(client: TestClient, db: Session) -> None:
     password = "PassWordCool"
 
     user_in = UserCreate(
@@ -71,15 +66,13 @@ def test_use_access_token(
     assert "username" in r.json()
 
 
-def test_wrong_access_token(
-    client: TestClient, db: Session
-) -> None:
+def test_wrong_access_token(client: TestClient, db: Session) -> None:
     response = get_token(client, "XXX", "BIIIIPWrongPassword")
 
     tokens = response.json()
     assert tokens == {"detail": "Incorrect username or password."}
 
-    headers = {"Authorization": f"Bearer 'somethingthatisnotatoken'"}
+    headers = {"Authorization": "Bearer 'somethingthatisnotatoken'"}
 
     r = client.post("/login/test-token", headers=headers)
 

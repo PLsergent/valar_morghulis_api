@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8]
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_PASSWORD: postgres
+
+    container: python:${{ matrix.python-version }}
+
+    steps:
+      - uses: actions/checkout@master
+      - uses: dschep/install-poetry-action@v1.3
+
+      - name: Install dependencies
+        run: |
+          poetry install
+          pip install invoke
+
+      - name: Run linters
+        run: invoke lint
+
+      - name: Run migrations
+        run: invoke migrate
+        env:
+          POSTGRES_HOST: postgres
+
+      - name: Run pytest
+        run: invoke test
+        env:
+          POSTGRES_HOST: postgres
