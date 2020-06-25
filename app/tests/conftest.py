@@ -1,12 +1,12 @@
 from typing import Generator
 
 import pytest
-from sqlalchemy.orm import Session
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
+from app.api.deps import get_db
 from app.db import session
 from app.main import app
-from app.api.deps import get_db
 
 
 @pytest.fixture(scope="module")
