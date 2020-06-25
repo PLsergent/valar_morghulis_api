@@ -16,7 +16,9 @@ services:
     image: valar_morghulis_api:latest
     build: .
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db/postgres
+      POSTGRES_HOST: "db"
+      BACKEND_CORS_ORIGINS: '["http://localhost", "http://localhost:8080", "http://localhost:3000"]'
+
     ports:
       - 8080:80
     links:
