@@ -1,4 +1,3 @@
-import os
 from typing import Generator
 
 import pytest
@@ -7,7 +6,7 @@ from fastapi.testclient import TestClient
 
 from app.db import session
 from app.main import app
-from app.security import get_db
+from app.api.deps import get_db
 
 
 @pytest.fixture(scope="module")

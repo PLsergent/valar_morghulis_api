@@ -1,17 +1,19 @@
 from datetime import timedelta
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-from app import crud, schemas, models, security
+from app import crud, models, schemas, security
+from app.api import deps
 
 router = APIRouter()
 
+
 @router.post("/token", response_model=schemas.token.Token)
 def login_access_token(
-    db: Session = Depends(security.get_db), form_data: OAuth2PasswordRequestForm = Depends()
+    db: Session = Depends(deps.get_db), form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Any:
     """
     OAuth2 compatible token login, get an access token for future requests
@@ -29,8 +31,9 @@ def login_access_token(
         "token_type": "bearer",
     }
 
+
 @router.post("/test-token", response_model=schemas.user.User)
-def test_token(current_user: models.User = Depends(security.get_current_user)) -> Any:
+def test_token(current_user: models.User = Depends(deps.get_current_user)) -> Any:
     """
     Test access token
     """

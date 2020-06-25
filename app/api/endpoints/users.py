@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Body, Depends, HTTPException
-from typing import Any, List
+from fastapi import APIRouter, Depends, HTTPException
+from typing import Any
 from sqlalchemy.orm import Session
 
-from app import crud, models, schemas, security
+from app import crud, schemas
+from app.api import deps
 
 router = APIRouter()
 
@@ -10,7 +11,7 @@ router = APIRouter()
 @router.post("/register", response_model=schemas.user.User)
 def create_user(
     *,
-    db: Session = Depends(security.get_db),
+    db: Session = Depends(deps.get_db),
     user_in: schemas.user.UserCreate
 ) -> Any:
     """

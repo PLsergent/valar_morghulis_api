@@ -1,11 +1,10 @@
-from typing import Dict, Any
+from typing import Any
 from sqlalchemy.orm import Session
 
 from fastapi.testclient import TestClient
 
 from app import crud
 from app.schemas.user import UserCreate
-from app.security import get_password_hash
 
 
 def get_token(client: TestClient, username: str, password: str) -> Any:
@@ -18,7 +17,7 @@ def get_token(client: TestClient, username: str, password: str) -> Any:
 
 def test_get_access_token(client: TestClient, db: Session) -> None:
     password = "PassWordCool"
-    
+
     user_in = UserCreate(
         email="user@user.com", password=password, username="other_username"
     )
@@ -33,14 +32,13 @@ def test_get_access_token(client: TestClient, db: Session) -> None:
 
 def test_wrong_passwd_access_token(client: TestClient, db: Session) -> None:
     password = "PassWordCool"
-    
+
     user_in = UserCreate(
         email="user@user.com", password=password, username="other_username"
     )
     user = crud.user.create(db, obj_in=user_in)
 
     r = get_token(client, user.username, "BIIIIPWrongPassword")
-    tokens = r.json()
     assert r.status_code == 400
     assert r.json() == {"detail": "Incorrect username or password."}
 
@@ -56,7 +54,7 @@ def test_use_access_token(
     client: TestClient, db: Session
 ) -> None:
     password = "PassWordCool"
-    
+
     user_in = UserCreate(
         email="user@user.com", password=password, username="other_username"
     )
@@ -68,10 +66,9 @@ def test_use_access_token(
     headers = {"Authorization": f"Bearer {a_token}"}
 
     r = client.post("/login/test-token", headers=headers)
-    result = r.json()
 
     assert r.status_code == 200
-    assert "username" in result
+    assert "username" in r.json()
 
 
 def test_wrong_access_token(
@@ -85,7 +82,6 @@ def test_wrong_access_token(
     headers = {"Authorization": f"Bearer 'somethingthatisnotatoken'"}
 
     r = client.post("/login/test-token", headers=headers)
-    result = r.json()
 
     assert r.status_code == 403
     assert r.json() == {"detail": "Could not validate credentials."}
