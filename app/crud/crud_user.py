@@ -1,5 +1,6 @@
 from typing import Any, Dict, Optional, Union
 
+from pydantic import EmailStr
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
@@ -12,14 +13,15 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def get_by_username(self, db: Session, *, username: str) -> Optional[User]:
         return db.query(User).filter_by(username=username).one_or_none()
 
-    def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
+    def get_by_email(self, db: Session, *, email: Optional[EmailStr]) -> Optional[User]:
         return db.query(User).filter_by(email=email).one_or_none()
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
         db_obj = User(
             email=obj_in.email,
-            hashed_password=get_password_hash(obj_in.password),
             username=obj_in.username,
+            hashed_password=get_password_hash(obj_in.password),
+            public_key=obj_in.public_key,
         )
         db.add(db_obj)
         db.commit()
