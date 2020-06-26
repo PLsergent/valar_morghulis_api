@@ -11,7 +11,7 @@ from app.api import deps
 router = APIRouter()
 
 
-@router.post("/token", response_model=schemas.token.Token)
+@router.post("/token", response_model=schemas.Token)
 def login_access_token(
     db: Session = Depends(deps.get_db), form_data: OAuth2PasswordRequestForm = Depends()
 ) -> Any:
@@ -29,10 +29,11 @@ def login_access_token(
             user.id, expires_delta=access_token_expires
         ),
         "token_type": "bearer",
+        "user_id": user.id,
     }
 
 
-@router.post("/test-token", response_model=schemas.user.User)
+@router.post("/test-token", response_model=schemas.User)
 def test_token(current_user: models.User = Depends(deps.get_current_user)) -> Any:
     """
     Test access token
