@@ -19,6 +19,7 @@ class UserBase(BaseModel):
 class UserCreate(UserBase):
     username: str
     password: str
+    public_key: str = "XXX"
 
 
 # Properties to receive via API on update
@@ -28,6 +29,7 @@ class UserUpdate(UserBase):
 
 class UserInDBBase(UserBase):
     id: Optional[UUID] = None
+    public_key: str
 
     class Config:
         orm_mode = True

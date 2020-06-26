@@ -10,7 +10,7 @@ def test_create_user_new_email(client: TestClient, db: Session) -> None:
     email = "test@email.com"
     password = "AniCepasSword14"
     username = "nice_username_du_74"
-    data = {"email": email, "password": password, "username": username}
+    data = {"email": email, "username": username, "password": password}
     r = client.post("/users/register", json=data)
 
     assert r.status_code == 200
