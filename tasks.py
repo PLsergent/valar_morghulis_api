@@ -28,7 +28,7 @@ def migrate(ctx):
 
 @task
 def run(ctx):
-    ctx.run("poetry run uvicorn app.main:app --reload")                
+    ctx.run("poetry run uvicorn app.main:app --reload")
 
 
 @task
