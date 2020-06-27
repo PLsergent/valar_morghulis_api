@@ -1,0 +1,32 @@
+---
+providers:
+  docker:
+    network: "{{ traefik_network_name }}"
+    exposedByDefault: false
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+
+  websecure:
+    address: ":443"
+    http:
+      tls:
+        certResolver: default
+        domains:
+          - main: "{{ domain_name }}"
+            sans:
+              - "*.{{ domain_name }}"
+
+certificatesResolvers:
+  default:
+    acme:
+      email: "{{ email }}"
+      storage: acme.json
+      dnsChallenge:
+        provider: scaleway

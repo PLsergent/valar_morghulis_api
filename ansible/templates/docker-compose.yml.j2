@@ -1,0 +1,44 @@
+version: "3"
+
+services:
+  backend:
+    image: {{ docker_image_name }}:{{ docker_image_version }}
+    container_name: "{{ project_name }}"
+    environment:
+      POSTGRES_HOST: "postgres"
+      POSTGRES_USER: "{{ postgres.user }}"
+      POSTGRES_PASSWORD: "{{ postgres.password }}"
+      POSTGRES_DB: "{{ postgres.db_name }}"
+      BACKEND_CORS_ORIGINS: '["https://{{ fqdn }}"]'
+    links:
+      - postgres
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.to-backend.rule=Host(`{{ fqdn }}`)"
+
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_USER: "{{ postgres.user }}"
+      POSTGRES_PASSWORD: "{{ postgres.password }}"
+      POSTGRES_DB: "{{ postgres.db_name }}"
+    volumes:
+      - "{{ db_volume_name }}:/var/lib/postgresql/data"
+
+  traefik:
+    image: traefik:2.2
+    container_name: traefik
+    environment:
+      SCALEWAY_API_TOKEN: "{{ scw_api_token }}"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "{{ traefik_acme_file_path }}:/acme.json"
+      - "{{ traefik_config_path }}:/etc/traefik/traefik.yml"
+
+volumes:
+  {{ db_volume_name }}:

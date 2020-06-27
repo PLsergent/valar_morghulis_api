@@ -1,0 +1,26 @@
+---
+email: "{{ vault_email }}"
+
+project_name: valar-morghulis
+project_dir: "/opt/{{ project_name }}"
+
+traefik_dir: "{{ project_dir }}/traefik"
+traefik_config_path: "{{ traefik_dir }}/traefik.yml"
+traefik_acme_file_path: "{{ traefik_dir }}/acme.json"
+traefik_network_name: "traefik_network"
+
+postgres:
+  user: "{{ vault_postgres.user }}"
+  password: "{{ vault_postgres.password }}"
+  db_name: "{{ vault_postgres.db_name }}"
+db_volume_name: "{{ project_name }}_db"
+
+domain_name: plsergent.xyz
+fqdn: "{{ project_name }}.{{ domain_name }}"
+
+scw_registry_namespace: "{{ vault_scw_registry_namespace }}"
+scw_registry_endpoint: rg.fr-par.scw.cloud/{{ scw_registry_namespace }}
+docker_image_name: "{{ scw_registry_endpoint }}/{{ project_name }}"
+docker_image_version: "{{ version }}"  # `version` has to be given as a command-line argument
+
+scw_api_token: "{{ vault_scw_api_token }}"
