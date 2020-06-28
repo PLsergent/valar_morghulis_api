@@ -43,8 +43,8 @@ def watch(ctx):
 
 @task
 def lint(ctx):
-    ctx.run("poetry run flake8 app", pty=True)
     ctx.run("poetry run mypy app", pty=True)
+    ctx.run("poetry run flake8 app", pty=True)
     ctx.run("poetry run black --check app", pty=True)
     ctx.run("poetry run isort -c --recursive app", pty=True)
 
