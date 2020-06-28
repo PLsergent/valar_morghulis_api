@@ -18,12 +18,12 @@ def read_articles(
     current_user: models.User = Depends(deps.get_current_user),
 ) -> Any:
     """
-    Retrieve items.
+    Retrieve articles.
     """
-    items = crud.article.get_multi_by_author(
-        db=db, author_id=current_user.id, skip=skip, limit=limit
+    articles = crud.article.get_multi_by_author(
+        db=db, id=current_user.id, skip=skip, limit=limit
     )
-    return items
+    return articles
 
 
 @router.post("/new", response_model=schemas.Article)
@@ -37,7 +37,7 @@ def create_article(
     Create new article.
     """
     article = crud.article.create_with_author(
-        db=db, obj_in=article_in, author_id=current_user.id
+        db=db, obj_in=article_in, id=current_user.id
     )
     return article
 
@@ -91,3 +91,88 @@ def delete_article(
         raise HTTPException(status_code=404, detail="Article not found")
     article = crud.article.remove(db=db, id=id)
     return article
+
+
+# Files
+
+
+@router.get("/{id}/files", response_model=List[schemas.File])
+def read_files_per_article(
+    *,
+    db: Session = Depends(deps.get_db),
+    id: UUID,
+    skip: int = 0,
+    limit: int = 100,
+    current_user: models.User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Retrieve files.
+    """
+    files = crud.file.get_multi_by_article(db=db, id=id, skip=skip, limit=limit)
+    return files
+
+
+@router.post("/{id}/files/new", response_model=schemas.File)
+def create_file(
+    *,
+    db: Session = Depends(deps.get_db),
+    id: str,
+    file_in: schemas.FileCreate,
+    current_user: models.User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Create new file.
+    """
+    file = crud.file.create_with_article(db=db, obj_in=file_in, id=id)
+    return file
+
+
+@router.get("/{article_id}/files/{id}", response_model=schemas.File)
+def read_file(
+    *,
+    db: Session = Depends(deps.get_db),
+    id: UUID,
+    current_user: models.User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Get file by ID.
+    """
+    file = crud.file.get(db=db, id=id)
+    if not file:
+        raise HTTPException(status_code=404, detail="File not found")
+    return file
+
+
+@router.put("/{article_did}/files/{id}", response_model=schemas.File)
+def update_file(
+    *,
+    db: Session = Depends(deps.get_db),
+    id: UUID,
+    file_in: schemas.FileUpdate,
+    current_user: models.User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Update a file.
+    """
+    file = crud.file.get(db=db, id=id)
+    if not file:
+        raise HTTPException(status_code=404, detail="File not found")
+    file = crud.file.update(db=db, db_obj=file, obj_in=file_in)
+    return file
+
+
+@router.delete("/{article_id}/files/{id}", response_model=schemas.File)
+def delete_file(
+    *,
+    db: Session = Depends(deps.get_db),
+    id: UUID,
+    current_user: models.User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Delete a file.
+    """
+    file = crud.file.get(db=db, id=id)
+    if not file:
+        raise HTTPException(status_code=404, detail="File not found")
+    file = crud.file.remove(db=db, id=id)
+    return file
