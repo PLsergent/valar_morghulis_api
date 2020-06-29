@@ -1,11 +1,12 @@
 from typing import Any, List
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
 from app.api import deps
+from app.config import settings
 
 router = APIRouter()
 
@@ -26,7 +27,7 @@ def read_articles(
     return articles
 
 
-@router.post("/new", response_model=schemas.Article)
+@router.post("/", response_model=schemas.Article)
 def create_article(
     *,
     db: Session = Depends(deps.get_db),
@@ -112,18 +113,30 @@ def read_files_per_article(
     return files
 
 
-@router.post("/{id}/files/new", response_model=schemas.File)
-def create_file(
+@router.post("/{id}/files/", response_model=schemas.File)
+def create_files(
+    files: List[UploadFile] = File(...),
     *,
     db: Session = Depends(deps.get_db),
+    s3: Any = Depends(deps.get_s3_client),
     id: str,
-    file_in: schemas.FileCreate,
     current_user: models.User = Depends(deps.get_current_user),
 ) -> Any:
     """
-    Create new file.
+    Create new files.
     """
-    file = crud.file.create_with_article(db=db, obj_in=file_in, id=id)
+    for file in files:
+        file_name = file.filename
+        key = f"{current_user.id}/{id}/{file_name}"
+        s3.put_object(
+            Body=file.file,
+            Bucket=f"{settings.AWS_STORAGE_BUCKET_NAME}",
+            Key=key,
+            ACL="public-read",
+            CacheControl="max-age=31556926",  # 1 year
+        )
+        file_in: schemas.FileCreate = {"name": file_name, "path": key}
+        file = crud.file.create_with_article(db=db, obj_in=file_in, id=id)
     return file
 
 

@@ -23,4 +23,5 @@ scw_registry_endpoint: rg.fr-par.scw.cloud/{{ scw_registry_namespace }}
 docker_image_name: "{{ scw_registry_endpoint }}/{{ project_name }}"
 docker_image_version: "{{ version }}"  # `version` has to be given as a command-line argument
 
+scw_access_key: "{{ vault_scw_access_key }}"
 scw_api_token: "{{ vault_scw_api_token }}"
