@@ -113,7 +113,7 @@ def read_files_per_article(
     return files
 
 
-@router.post("/{id}/files/", response_model=schemas.File)
+@router.post("/{id}/files/", response_model=List[schemas.File])
 def create_files(
     files: List[UploadFile] = File(...),
     *,
@@ -125,6 +125,7 @@ def create_files(
     """
     Create new files.
     """
+    response = []
     for file in files:
         file_name = file.filename
         key = f"{current_user.id}/{id}/{file_name}"
@@ -137,7 +138,8 @@ def create_files(
         )
         file_in: schemas.FileCreate = {"name": file_name, "path": key}
         file = crud.file.create_with_article(db=db, obj_in=file_in, id=id)
-    return file
+        response.append(file)
+    return response
 
 
 @router.get("/{article_id}/files/{id}", response_model=schemas.File)
@@ -156,7 +158,7 @@ def read_file(
     return file
 
 
-@router.put("/{article_did}/files/{id}", response_model=schemas.File)
+@router.put("/{article_id}/files/{id}", response_model=schemas.File)
 def update_file(
     *,
     db: Session = Depends(deps.get_db),
@@ -174,18 +176,21 @@ def update_file(
     return file
 
 
-@router.delete("/{article_id}/files/{id}", response_model=schemas.File)
+@router.delete("/{article_id}/files/{id}", response_model=List[schemas.File])
 def delete_file(
     *,
     db: Session = Depends(deps.get_db),
-    id: UUID,
+    s3: Any = Depends(deps.get_s3_client),
+    ids: List[UUID],
     current_user: models.User = Depends(deps.get_current_user),
 ) -> Any:
     """
     Delete a file.
     """
-    file = crud.file.get(db=db, id=id)
-    if not file:
-        raise HTTPException(status_code=404, detail="File not found")
-    file = crud.file.remove(db=db, id=id)
+    for id in ids:
+        file = crud.file.get(db=db, id=id)
+        if not file:
+            raise HTTPException(status_code=404, detail="File not found")
+        file = crud.file.remove(db=db, id=id)
+        s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=file.path) 
     return file
