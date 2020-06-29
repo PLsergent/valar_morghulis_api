@@ -33,7 +33,7 @@ def login_access_token(
     }
 
 
-@router.post("/test-token", response_model=schemas.User)
+@router.post("/test-token", response_model=schemas.UserOut)
 def test_token(current_user: models.User = Depends(deps.get_current_user)) -> Any:
     """
     Test access token
