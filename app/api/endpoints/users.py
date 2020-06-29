@@ -1,8 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter, Body, Depends, HTTPException
-from fastapi.encoders import jsonable_encoder
-from pydantic.networks import EmailStr
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
@@ -11,7 +9,7 @@ from app.api import deps
 router = APIRouter()
 
 
-@router.post("/register", response_model=schemas.User)
+@router.post("", response_model=schemas.UserOut)
 def create_user(
     *, db: Session = Depends(deps.get_db), user_in: schemas.UserCreate
 ) -> Any:
@@ -32,7 +30,7 @@ def create_user(
     return user
 
 
-@router.get("/me", response_model=schemas.User)
+@router.get("/me", response_model=schemas.UserOut)
 def read_user_me(
     db: Session = Depends(deps.get_db),
     current_user: models.User = Depends(deps.get_current_user),
@@ -43,31 +41,15 @@ def read_user_me(
     return current_user
 
 
-@router.put("/me/update", response_model=schemas.User)
+@router.patch("/me", response_model=schemas.UserOut)
 def update_user_me(
     *,
     db: Session = Depends(deps.get_db),
-    password: str = Body(None),
-    username: str = Body(None),
-    name: str = Body(None),
-    firstname: str = Body(None),
-    email: EmailStr = Body(None),
     current_user: models.User = Depends(deps.get_current_user),
+    user_in: schemas.UserUpdate
 ) -> Any:
     """
     Update own user.
     """
-    current_user_data = jsonable_encoder(current_user)
-    user_in = schemas.UserUpdate(**current_user_data)
-    if password is not None:
-        user_in.password = password
-    if name is not None:
-        user_in.name = name
-    if firstname is not None:
-        user_in.firstname = firstname
-    if email is not None:
-        user_in.email = email
-    if username is not None:
-        user_in.username = username
     user = crud.user.update(db, db_obj=current_user, obj_in=user_in)
     return user

@@ -1,4 +1,4 @@
-from typing import Generator
+from typing import Dict, Generator
 
 import pytest
 from fastapi.testclient import TestClient
@@ -30,3 +30,13 @@ def db() -> Generator:
     test_session.close()
     transaction.rollback()
     connection.close()
+
+
+@pytest.fixture
+def user_data() -> Dict[str, str]:
+    return {
+        "email": "test@email.com",
+        "username": "AniCepasSword14",
+        "password": "nice_username_du_74",
+        "public_key": "my_public_key",
+    }

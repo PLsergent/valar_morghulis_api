@@ -17,12 +17,12 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return db.query(User).filter_by(email=email).one_or_none()
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
-        db_obj = User(
-            email=obj_in.email,
-            username=obj_in.username,
-            hashed_password=get_password_hash(obj_in.password),
-            public_key=obj_in.public_key,
-        )
+        obj_in_dict = obj_in.dict()
+        hashed_password = get_password_hash(obj_in_dict["password"])
+        del obj_in_dict["password"]
+        obj_in_dict["hashed_password"] = hashed_password
+
+        db_obj = User(**obj_in_dict)
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -35,7 +35,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             update_data = obj_in
         else:
             update_data = obj_in.dict(exclude_unset=True)
-        if update_data["password"]:
+        if update_data.get("password"):
             hashed_password = get_password_hash(update_data["password"])
             del update_data["password"]
             update_data["hashed_password"] = hashed_password

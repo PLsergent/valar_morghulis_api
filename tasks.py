@@ -52,5 +52,5 @@ def lint(ctx):
 @task
 def format(ctx):
     ctx.run("poetry run isort -y --atomic --recursive app", pty=True)
-    ctx.run("poetry run autoflake -ri --exclude=__init__.py app", pty=True)
+    ctx.run("poetry run autoflake -ri --remove-all-unused-imports --exclude=__init__.py app", pty=True)
     ctx.run("poetry run black app", pty=True)
