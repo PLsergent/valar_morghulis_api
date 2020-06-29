@@ -72,14 +72,13 @@ class Settings(BaseSettings):
 
     class Config:
         case_sensitive = True
-    
-    
+
     AWS_ACCESS_KEY_ID: Optional[str] = None
     AWS_SECRET_ACCESS_KEY: Optional[str] = None
-    AWS_STORAGE_BUCKET_NAME = 'valar-morghulis'
-    AWS_DEFAULT_ACL = 'public-read'
-    AWS_S3_REGION_NAME = 'fr-par'
-    AWS_S3_ENDPOINT_URL = 'https://s3.fr-par.scw.cloud'
+    AWS_STORAGE_BUCKET_NAME = "valar-morghulis"
+    AWS_DEFAULT_ACL = "public-read"
+    AWS_S3_REGION_NAME = "fr-par"
+    AWS_S3_ENDPOINT_URL = "https://s3.fr-par.scw.cloud"
 
 
 settings = Settings()
