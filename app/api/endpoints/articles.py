@@ -11,7 +11,7 @@ from app.config import settings
 router = APIRouter()
 
 
-@router.get("/", response_model=List[schemas.Article])
+@router.get("", response_model=List[schemas.Article])
 def read_articles(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
@@ -27,7 +27,7 @@ def read_articles(
     return articles
 
 
-@router.post("/", response_model=schemas.Article)
+@router.post("", response_model=schemas.Article)
 def create_article(
     *,
     db: Session = Depends(deps.get_db),
@@ -113,8 +113,8 @@ def read_files_per_article(
     return files
 
 
-@router.post("/{id}/files/", response_model=List[schemas.File])
-def create_files(
+@router.post("/{id}/files", response_model=List[schemas.File])
+def create_files_per_article(
     files: List[UploadFile] = File(...),
     *,
     db: Session = Depends(deps.get_db),
@@ -136,9 +136,9 @@ def create_files(
             ACL="public-read",
             CacheControl="max-age=31556926",  # 1 year
         )
-        file_in: schemas.FileCreate = {"name": file_name, "path": key}
-        file = crud.file.create_with_article(db=db, obj_in=file_in, id=id)
-        response.append(file)
+        file_in: Any = {"name": file_name, "path": key}
+        file_created = crud.file.create_with_article(db=db, obj_in=file_in, id=id)
+        response.append(file_created)
     return response
 
 
@@ -177,7 +177,7 @@ def update_file(
 
 
 @router.delete("/{article_id}/files/{id}", response_model=List[schemas.File])
-def delete_file(
+def delete_files_per_article(
     *,
     db: Session = Depends(deps.get_db),
     s3: Any = Depends(deps.get_s3_client),
@@ -187,10 +187,12 @@ def delete_file(
     """
     Delete a file.
     """
+    response = []
     for id in ids:
         file = crud.file.get(db=db, id=id)
         if not file:
             raise HTTPException(status_code=404, detail="File not found")
         file = crud.file.remove(db=db, id=id)
-        s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=file.path) 
-    return file
+        s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=file.path)
+        response.append(file)
+    return response
