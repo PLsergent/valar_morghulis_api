@@ -1,10 +1,11 @@
 from typing import Any, Dict, Optional, Union
 
+from fastapi.encoders import jsonable_encoder
 from pydantic import EmailStr
 from sqlalchemy.orm import Session
 
 from app.crud.base import CRUDBase
-from app.models import User
+from app.db.models import User
 from app.schemas.user import UserCreate, UserUpdate
 from app.security import get_password_hash, verify_password
 
@@ -17,12 +18,12 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return db.query(User).filter_by(email=email).one_or_none()
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
-        obj_in_dict = obj_in.dict()
-        hashed_password = get_password_hash(obj_in_dict["password"])
-        del obj_in_dict["password"]
-        obj_in_dict["hashed_password"] = hashed_password
+        obj_in_data = jsonable_encoder(obj_in)
+        hashed_password = get_password_hash(obj_in_data["password"])
+        del obj_in_data["password"]
+        obj_in_data["hashed_password"] = hashed_password
 
-        db_obj = User(**obj_in_dict)
+        db_obj = User(**obj_in_data)
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
