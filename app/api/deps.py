@@ -7,8 +7,9 @@ from jose import jwt
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
-from app import crud, models, schemas, security
+from app import crud, schemas, security
 from app.config import settings
+from app.db import models
 from app.db.session import SessionLocal
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login/token")

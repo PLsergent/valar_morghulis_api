@@ -1,4 +1,4 @@
-from .article import Article, ArticleCreate, ArticleInDB, ArticleUpdate
-from .file import File, FileCreate, FileInDB, FileUpdate
+from .article import ArticleCreate, ArticleOut, ArticleUpdate
+from .file import FileCreate, FileOut, FileUpdate
 from .token import Token, TokenPayload
 from .user import UserCreate, UserOut, UserUpdate

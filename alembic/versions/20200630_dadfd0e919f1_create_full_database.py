@@ -1,8 +1,8 @@
 """create_full_database
 
-Revision ID: b6207568ff00
+Revision ID: dadfd0e919f1
 Revises: 
-Create Date: 2020-06-26 04:40:12.800200
+Create Date: 2020-06-30 00:41:42.560656
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision = 'b6207568ff00'
+revision = 'dadfd0e919f1'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -36,18 +36,18 @@ def upgrade():
     op.create_table('article',
     sa.Column('id', postgresql.UUID(as_uuid=True), server_default=sa.text('gen_random_uuid()'), nullable=False),
     sa.Column('title', sa.String(), nullable=False),
-    sa.Column('body', sa.String(), nullable=False),
+    sa.Column('body', sa.Text(), nullable=False),
     sa.Column('upvote', sa.Integer(), nullable=False),
     sa.Column('downvote', sa.Integer(), nullable=False),
     sa.Column('published', sa.Boolean(), nullable=False),
     sa.Column('original', sa.Boolean(), nullable=False),
     sa.Column('verified', sa.Boolean(), nullable=False),
     sa.Column('author_id', postgresql.UUID(as_uuid=True), nullable=True),
-    sa.Column('readable_by_id', postgresql.UUID(as_uuid=True), nullable=True),
-    sa.Column('original_id', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('owner_id', postgresql.UUID(as_uuid=True), nullable=True),
+    sa.Column('original_article_id', postgresql.UUID(as_uuid=True), nullable=True),
     sa.ForeignKeyConstraint(['author_id'], ['user.id'], ),
-    sa.ForeignKeyConstraint(['original_id'], ['article.id'], ),
-    sa.ForeignKeyConstraint(['readable_by_id'], ['user.id'], ),
+    sa.ForeignKeyConstraint(['original_article_id'], ['article.id'], ),
+    sa.ForeignKeyConstraint(['owner_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_article_id'), 'article', ['id'], unique=False)

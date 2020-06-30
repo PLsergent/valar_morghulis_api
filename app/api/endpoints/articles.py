@@ -4,14 +4,15 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
 
-from app import crud, models, schemas
+from app import crud, schemas
 from app.api import deps
 from app.config import settings
+from app.db import models
 
 router = APIRouter()
 
 
-@router.get("", response_model=List[schemas.Article])
+@router.get("", response_model=List[schemas.ArticleOut])
 def read_articles(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
@@ -22,12 +23,12 @@ def read_articles(
     Retrieve articles.
     """
     articles = crud.article.get_multi_by_author(
-        db=db, id=current_user.id, skip=skip, limit=limit
+        db=db, author_id=current_user.id, skip=skip, limit=limit
     )
     return articles
 
 
-@router.post("", response_model=schemas.Article)
+@router.post("", response_model=schemas.ArticleOut)
 def create_article(
     *,
     db: Session = Depends(deps.get_db),
@@ -38,88 +39,94 @@ def create_article(
     Create new article.
     """
     article = crud.article.create_with_author(
-        db=db, obj_in=article_in, id=current_user.id
+        db=db, obj_in=article_in, author_id=current_user.id
     )
     return article
 
 
-@router.get("/{id}", response_model=schemas.Article)
+@router.get("/{article_id}", response_model=schemas.ArticleOut)
 def read_article(
     *,
     db: Session = Depends(deps.get_db),
-    id: UUID,
+    article_id: UUID,
     current_user: models.User = Depends(deps.get_current_user),
 ) -> Any:
     """
     Get article by ID.
     """
-    article = crud.article.get(db=db, id=id)
+    article = crud.article.get_by_id_and_owner(
+        db=db, id=article_id, owner_id=current_user.id
+    )
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
     return article
 
 
-@router.put("/{id}", response_model=schemas.Article)
+@router.patch("/{article_id}", response_model=schemas.ArticleOut)
 def update_article(
     *,
     db: Session = Depends(deps.get_db),
-    id: UUID,
+    article_id: UUID,
     article_in: schemas.ArticleUpdate,
     current_user: models.User = Depends(deps.get_current_user),
 ) -> Any:
     """
     Update an article.
     """
-    article = crud.article.get(db=db, id=id)
+    article = crud.article.get_by_id_and_owner(
+        db=db, id=article_id, owner_id=current_user.id
+    )
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
     article = crud.article.update(db=db, db_obj=article, obj_in=article_in)
     return article
 
 
-@router.delete("/{id}", response_model=schemas.Article)
+@router.delete("/{article_id}", response_model=schemas.ArticleOut)
 def delete_article(
     *,
     db: Session = Depends(deps.get_db),
-    id: UUID,
+    article_id: UUID,
     current_user: models.User = Depends(deps.get_current_user),
 ) -> Any:
     """
     Delete an article.
     """
-    article = crud.article.get(db=db, id=id)
+    article = crud.article.get_by_id_and_owner(
+        db=db, id=article_id, owner_id=current_user.id
+    )
     if not article:
         raise HTTPException(status_code=404, detail="Article not found")
-    article = crud.article.remove(db=db, id=id)
+    crud.article.remove(db, db_obj=article)
     return article
 
 
 # Files
 
 
-@router.get("/{id}/files", response_model=List[schemas.File])
+@router.get("/{article_id}/files", response_model=List[schemas.FileOut])
 def read_files_per_article(
     *,
     db: Session = Depends(deps.get_db),
-    id: UUID,
-    skip: int = 0,
-    limit: int = 100,
+    article_id: UUID,
     current_user: models.User = Depends(deps.get_current_user),
 ) -> Any:
     """
     Retrieve files.
     """
-    files = crud.file.get_multi_by_article(db=db, id=id, skip=skip, limit=limit)
-    return files
+    article = crud.article.get_by_id_and_owner(
+        db, id=article_id, owner_id=current_user.id
+    )
+    return article.files
 
 
-@router.post("/{id}/files", response_model=List[schemas.File])
+@router.post("/{article_id}/files", response_model=List[schemas.File])
 def create_files_per_article(
     files: List[UploadFile] = File(...),
     *,
     db: Session = Depends(deps.get_db),
     s3: Any = Depends(deps.get_s3_client),
-    id: str,
+    article_id: UUID,
     current_user: models.User = Depends(deps.get_current_user),
 ) -> Any:
     """
@@ -137,51 +144,54 @@ def create_files_per_article(
             CacheControl="max-age=31556926",  # 1 year
         )
         file_in: Any = {"name": file_name, "path": key}
-        file_created = crud.file.create_with_article(db=db, obj_in=file_in, id=id)
+        file_created = crud.file.create_with_article(db=db, obj_in=file_in, id=article_id)
         response.append(file_created)
     return response
 
 
-@router.get("/{article_id}/files/{id}", response_model=schemas.File)
+@router.get("/{article_id}/files/{file_id}", response_model=schemas.FileOut)
 def read_file(
     *,
     db: Session = Depends(deps.get_db),
-    id: UUID,
+    article_id: UUID,
+    file_id: UUID,
     current_user: models.User = Depends(deps.get_current_user),
 ) -> Any:
     """
     Get file by ID.
     """
-    file = crud.file.get(db=db, id=id)
+    file = crud.file.get(db=db, id=file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
     return file
 
 
-@router.put("/{article_id}/files/{id}", response_model=schemas.File)
+@router.put("/{article_id}/files/{file_id}", response_model=schemas.FileOut)
 def update_file(
     *,
     db: Session = Depends(deps.get_db),
-    id: UUID,
+    article_id: UUID,
+    file_id: UUID,
     file_in: schemas.FileUpdate,
     current_user: models.User = Depends(deps.get_current_user),
 ) -> Any:
     """
     Update a file.
     """
-    file = crud.file.get(db=db, id=id)
+    file = crud.file.get(db=db, id=file_id)
     if not file:
         raise HTTPException(status_code=404, detail="File not found")
     file = crud.file.update(db=db, db_obj=file, obj_in=file_in)
     return file
 
 
-@router.delete("/{article_id}/files/{id}", response_model=List[schemas.File])
+@router.delete("/{article_id}/files", response_model=List[schemas.FileOut])
 def delete_files_per_article(
     *,
     db: Session = Depends(deps.get_db),
     s3: Any = Depends(deps.get_s3_client),
     ids: List[UUID],
+    article_id: UUID,
     current_user: models.User = Depends(deps.get_current_user),
 ) -> Any:
     """
@@ -192,7 +202,7 @@ def delete_files_per_article(
         file = crud.file.get(db=db, id=id)
         if not file:
             raise HTTPException(status_code=404, detail="File not found")
-        file = crud.file.remove(db=db, id=id)
+        file = crud.file.remove(db=db, obj_in=file)
         s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=file.path)
         response.append(file)
     return response

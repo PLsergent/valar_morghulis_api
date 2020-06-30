@@ -1,42 +1,37 @@
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel
+
+from .file import FileCreate, FileOut
 
 
 class ArticleBase(BaseModel):
     title: Optional[str] = None
     body: Optional[str] = None
-    upvote: int = 0
-    downvote: int = 0
-    published: bool = False
-    original: bool = True
-    verified: bool = False
 
 
 class ArticleCreate(ArticleBase):
     title: str
     body: str
+    files: Optional[List[FileCreate]] = []
 
 
 class ArticleUpdate(ArticleBase):
     pass
 
 
-class ArticleInDBBase(ArticleBase):
+class ArticleOut(ArticleBase):
     id: UUID
-    title: str
     author_id: UUID
-    readable_by_id: Optional[UUID] = None
+    owner_id: UUID
     original_id: Optional[UUID] = None
+    upvote: int
+    downvote: int
+    published: bool
+    original: bool
+    verified: bool
+    files: Optional[List[FileOut]]
 
     class Config:
         orm_mode = True
-
-
-class Article(ArticleInDBBase):
-    pass
-
-
-class ArticleInDB(ArticleInDBBase):
-    pass
