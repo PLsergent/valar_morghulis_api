@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 from uuid import UUID
 
 from fastapi.encoders import jsonable_encoder
@@ -11,7 +11,7 @@ from app.schemas.article import ArticleCreate, ArticleUpdate
 
 class CRUDArticle(CRUDBase[Article, ArticleCreate, ArticleUpdate]):
     def create_with_author(
-        self, db: Session, *, obj_in: ArticleCreate, author_id: Optional[str]
+        self, db: Session, *, obj_in: ArticleCreate, author_id: str
     ) -> Article:
         obj_in_data = jsonable_encoder(obj_in)
         db_obj = self.model(**obj_in_data, author_id=author_id)
@@ -25,7 +25,7 @@ class CRUDArticle(CRUDBase[Article, ArticleCreate, ArticleUpdate]):
     ) -> List[Article]:
         return (
             db.query(self.model)
-            .filter_by(author_id == author_id)
+            .filter_by(author_id=author_id)
             .offset(skip)
             .limit(limit)
             .all()

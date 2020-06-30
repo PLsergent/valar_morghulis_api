@@ -28,7 +28,7 @@ class Article(Base, UUIDPKMixin):
     downvote = Column(Integer, nullable=False, default=0)
     published = Column(Boolean, nullable=False, default=False)
     original = Column(Boolean, nullable=False, default=True)
-    verified = Column(Boolean, nullable=False, default=True)
+    verified = Column(Boolean, nullable=False, default=False)
     author_id = Column(UUID(as_uuid=True), ForeignKey("user.id"))
     author = relationship("User", foreign_keys=[author_id], backref="written_articles")
     owner_id = Column(UUID(as_uuid=True), ForeignKey("user.id"))

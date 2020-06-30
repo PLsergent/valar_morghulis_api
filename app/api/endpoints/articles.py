@@ -120,13 +120,13 @@ def read_files_per_article(
     return article.files
 
 
-@router.post("/{article_id}/files", response_model=List[schemas.File])
+@router.post("/{article_id}/files", response_model=List[schemas.FileOut])
 def create_files_per_article(
     files: List[UploadFile] = File(...),
     *,
     db: Session = Depends(deps.get_db),
     s3: Any = Depends(deps.get_s3_client),
-    article_id: UUID,
+    article_id: str,
     current_user: models.User = Depends(deps.get_current_user),
 ) -> Any:
     """
@@ -135,7 +135,7 @@ def create_files_per_article(
     response = []
     for file in files:
         file_name = file.filename
-        key = f"{current_user.id}/{id}/{file_name}"
+        key = f"{current_user.id}/{article_id}/{file_name}"
         s3.put_object(
             Body=file.file,
             Bucket=f"{settings.AWS_STORAGE_BUCKET_NAME}",
@@ -144,7 +144,9 @@ def create_files_per_article(
             CacheControl="max-age=31556926",  # 1 year
         )
         file_in: Any = {"name": file_name, "path": key}
-        file_created = crud.file.create_with_article(db=db, obj_in=file_in, id=article_id)
+        file_created = crud.file.create_with_article(
+            db=db, obj_in=file_in, id=article_id
+        )
         response.append(file_created)
     return response
 
@@ -202,7 +204,7 @@ def delete_files_per_article(
         file = crud.file.get(db=db, id=id)
         if not file:
             raise HTTPException(status_code=404, detail="File not found")
-        file = crud.file.remove(db=db, obj_in=file)
+        file = crud.file.remove(db=db, db_obj=file)
         s3.delete_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=file.path)
         response.append(file)
     return response
