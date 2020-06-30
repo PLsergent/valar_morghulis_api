@@ -60,7 +60,9 @@ def test_article_article(
 ) -> None:
     new_title = "My New Title"
     r = client.patch(
-        f"/articles/{article.id}", json={"title": new_title}, headers=auth_headers
+        f"/articles/{article.id}",
+        json={"title": new_title, "body": article.body},
+        headers=auth_headers,
     )
     assert r.status_code == 200
     assert article.title == r.json()["title"] == new_title

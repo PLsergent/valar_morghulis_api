@@ -1,9 +1,7 @@
-from typing import List, Optional
+from typing import Optional
 from uuid import UUID
 
 from pydantic import BaseModel
-
-from .file import FileCreate, FileOut
 
 
 class ArticleBase(BaseModel):
@@ -14,11 +12,13 @@ class ArticleBase(BaseModel):
 class ArticleCreate(ArticleBase):
     title: str
     body: str
-    files: Optional[List[FileCreate]] = []
 
 
 class ArticleUpdate(ArticleBase):
-    pass
+    title: str
+    body: str
+    published: Optional[bool] = False
+    verified: Optional[bool] = False
 
 
 class ArticleOut(ArticleBase):
@@ -31,7 +31,6 @@ class ArticleOut(ArticleBase):
     published: bool
     original: bool
     verified: bool
-    files: Optional[List[FileOut]]
 
     class Config:
         orm_mode = True
