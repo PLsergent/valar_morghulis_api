@@ -1,7 +1,9 @@
-from typing import Optional
+from typing import List, Optional
 from uuid import UUID
 
 from pydantic import BaseModel
+
+from .file import FileOut
 
 
 class ArticleBase(BaseModel):
@@ -31,6 +33,7 @@ class ArticleOut(ArticleBase):
     published: bool
     original: bool
     verified: bool
+    files: Optional[List[FileOut]]
 
     class Config:
         orm_mode = True

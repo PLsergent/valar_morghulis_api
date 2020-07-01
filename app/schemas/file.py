@@ -11,6 +11,7 @@ class FileBase(BaseModel):
 
 class FileCreate(FileBase):
     name: str
+    path: str
 
 
 class FileUpdate(FileBase):

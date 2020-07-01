@@ -12,7 +12,7 @@ from app.config import settings
 from app.db import models
 from app.db.session import SessionLocal
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login/token")
 
 
 def get_db() -> Generator:

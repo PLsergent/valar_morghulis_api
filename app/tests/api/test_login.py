@@ -9,7 +9,7 @@ from app.schemas.user import UserCreate
 
 def get_token_response(client: TestClient, username: str, password: str) -> int:
     login_data = {"username": username, "password": password}
-    return client.post("/login/token", data=login_data)
+    return client.post("/api/v1/login/token", data=login_data)
 
 
 def test_get_access_token(
@@ -53,7 +53,7 @@ def test_use_access_token(
     access_token = r.json()["access_token"]
     headers = {"Authorization": f"Bearer {access_token}"}
 
-    r = client.post("/login/test-token", headers=headers)
+    r = client.post("/api/v1/login/test-token", headers=headers)
 
     assert r.status_code == 200
     assert "username" in r.json()
@@ -67,7 +67,7 @@ def test_wrong_access_token(client: TestClient, db: Session) -> None:
 
     headers = {"Authorization": "Bearer 'somethingthatisnotatoken'"}
 
-    r = client.post("/login/test-token", headers=headers)
+    r = client.post("/api/v1/login/test-token", headers=headers)
 
     assert r.status_code == 403
     assert r.json() == {"detail": "Could not validate credentials."}
