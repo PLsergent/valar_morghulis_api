@@ -1,5 +1,5 @@
 from typing import Any, List
-from uuid import UUID
+from uuid import UUID, uuid1
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from sqlalchemy.orm import Session
@@ -145,9 +145,59 @@ def create_files_per_article(
         )
         file_in: Any = {"name": file_name, "path": key}
         file_created = crud.file.create_with_article(
-            db=db, obj_in=file_in, id=article_id
+            db=db, obj_in=file_in, article_id=article_id
         )
         response.append(file_created)
+    return response
+
+
+# Alternative routes
+
+
+@router.post("/{article_id}/files/bytes", response_model=List[str])
+def create_files_bytes_per_article(
+    files: List[bytes] = File(...),
+    *,
+    db: Session = Depends(deps.get_db),
+    s3: Any = Depends(deps.get_s3_client),
+    article_id: str,
+    current_user: models.User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Upload files to the s3.
+    """
+    response = []
+    for file in files:
+        key = f"{current_user.id}/{article_id}/{uuid1()}"
+        s3.put_object(
+            Body=file,
+            Bucket=f"{settings.AWS_STORAGE_BUCKET_NAME}",
+            Key=key,
+            ACL="public-read",
+            CacheControl="max-age=31556926",  # 1 year
+        )
+        response.append(key)
+    return response
+
+
+@router.post("/{article_id}/files/obj", response_model=List[schemas.FileOut])
+def create_files_obj_per_article(
+    *,
+    db: Session = Depends(deps.get_db),
+    s3: Any = Depends(deps.get_s3_client),
+    article_id: str,
+    files_in: List[schemas.FileCreate],
+    current_user: models.User = Depends(deps.get_current_user),
+) -> Any:
+    """
+    Create new files objects using path.
+    """
+    response = []
+    for file_in in files_in:
+        file = crud.file.create_with_article(
+            db=db, obj_in=file_in, article_id=article_id
+        )
+        response.append(file)
     return response
 
 

@@ -30,7 +30,7 @@ def test_create_article(
     auth_headers: Dict[str, str],
     article_data: Dict[str, str],
 ) -> None:
-    r = client.post("/articles", json=article_data, headers=auth_headers)
+    r = client.post("/api/v1/articles", json=article_data, headers=auth_headers)
     assert r.status_code == 200
 
     created_article = r.json()
@@ -46,7 +46,7 @@ def test_remove_article(
     auth_headers: Dict[str, str],
     article: Article,
 ) -> None:
-    r = client.delete(f"/articles/{article.id}", headers=auth_headers)
+    r = client.delete(f"/api/v1/articles/{article.id}", headers=auth_headers)
     assert r.status_code == 200
     assert crud.article.get(db, article.id) is None
 
@@ -60,7 +60,7 @@ def test_article_article(
 ) -> None:
     new_title = "My New Title"
     r = client.patch(
-        f"/articles/{article.id}",
+        f"/api/v1/articles/{article.id}",
         json={"title": new_title, "body": article.body},
         headers=auth_headers,
     )

@@ -23,7 +23,7 @@ def user_data() -> Dict[str, str]:
 def test_create_user_new_email(
     client: TestClient, db: Session, user_data: Dict[str, str]
 ) -> None:
-    r = client.post("/users", json=user_data)
+    r = client.post("/api/v1/users", json=user_data)
     assert r.status_code == 200
 
     created_user = r.json()
@@ -45,7 +45,7 @@ def test_create_user_existing_email(
     )
     crud.user.create(db, obj_in=user_in)
 
-    r = client.post("/users", json=user_data)
+    r = client.post("/api/v1/users", json=user_data)
     assert r.status_code == 400
     assert r.json() == {"detail": "Email already taken."}
 
@@ -61,7 +61,7 @@ def test_create_user_existing_username(
     )
     crud.user.create(db, obj_in=user_in)
 
-    r = client.post("/users", json=user_data)
+    r = client.post("/api/v1/users", json=user_data)
     assert r.status_code == 400
     assert r.json() == {"detail": "Username already taken."}
 
@@ -76,7 +76,9 @@ def test_update_user_lastname(
     headers = get_token_headers(client, user_data["username"], user_data["password"])
 
     new_lastname = "Lewis"
-    r = client.patch("/users/me", json={"lastname": new_lastname}, headers=headers)
+    r = client.patch(
+        "api/v1/users/me", json={"lastname": new_lastname}, headers=headers
+    )
     assert r.status_code == 200
     assert user.lastname == new_lastname
     assert user.firstname == firstname

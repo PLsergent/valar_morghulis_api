@@ -7,9 +7,11 @@ from app.schemas.file import FileCreate, FileUpdate
 
 
 class CRUDFile(CRUDBase[File, FileCreate, FileUpdate]):
-    def create_with_article(self, db: Session, *, obj_in: FileCreate, id: str) -> File:
+    def create_with_article(
+        self, db: Session, *, obj_in: FileCreate, article_id: str
+    ) -> File:
         obj_in_data = jsonable_encoder(obj_in)
-        db_obj = self.model(**obj_in_data, article_id=id)
+        db_obj = self.model(**obj_in_data, article_id=article_id)
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
