@@ -16,11 +16,13 @@ postgres:
 db_volume_name: "{{ project_name }}_db"
 
 domain_name: plsergent.xyz
-fqdn: "{{ project_name }}.{{ domain_name }}"
+fqdn: "api-{{ project_name }}.{{ domain_name }}"
+fqdn_front: "{{ project_name }}.{{ domain_name }}"
 
 scw_registry_namespace: "{{ vault_scw_registry_namespace }}"
 scw_registry_endpoint: rg.fr-par.scw.cloud/{{ scw_registry_namespace }}
 docker_image_name: "{{ scw_registry_endpoint }}/{{ project_name }}"
+docker_front_image_name: "{{ scw_registry_endpoint }}/{{ project_name }}-front"
 docker_image_version: "{{ version }}"  # `version` has to be given as a command-line argument
 
 scw_access_key: "{{ vault_scw_access_key }}"
