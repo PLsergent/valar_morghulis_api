@@ -11,13 +11,23 @@ services:
       POSTGRES_DB: "{{ postgres.db_name }}"
       AWS_ACCESS_KEY_ID: "{{ scw_access_key }}"
       AWS_SECRET_ACCESS_KEY: "{{ scw_api_token }}"
-      BACKEND_CORS_ORIGINS: '["https://{{ fqdn }}"]'
+      BACKEND_CORS_ORIGINS: '["https://{{ fqdn_front }}"]'
     links:
       - postgres
       - traefik
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.to-backend.rule=Host(`{{ fqdn }}`)"
+    
+  frontend:
+    image: {{ docker_front_image_name }}:{{ docker_image_version }}
+    container_name: "{{ project_name }}-front"
+    links:
+      - traefik
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.to-frontend.rule=Host(`{{ fqdn_front }}`)"
+      - "traefik.http.services.frontend.loadbalancer.server.port=8080"
 
   postgres:
     image: postgres:13
